@@ -12,6 +12,7 @@
 - MyBatis-Plus 3.5.16
 - MySQL 8.x
 - JWT
+- Springdoc OpenAPI / Swagger UI
 - Maven Wrapper
 
 ## 功能说明
@@ -162,6 +163,13 @@ http://localhost:5173
 http://127.0.0.1:5173
 ```
 
+### Springdoc OpenAPI / Swagger UI
+
+- 用途：自动生成接口文档，并提供浏览器页面测试接口。
+- 文档页面：`http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON：`http://localhost:8080/v3/api-docs`
+- 已配置 JWT Bearer 认证，登录成功后可在 Swagger 页面点击 `Authorize`，填写后端返回的 Token，再测试需要登录的接口。
+
 ## 目录结构
 
 ```text
@@ -212,6 +220,12 @@ mysql -uroot -p123456 --default-character-set=utf8mb4 < src/main/resources/db/in
 
 ```text
 http://localhost:8080
+```
+
+接口测试页面：
+
+```text
+http://localhost:8080/swagger-ui.html
 ```
 
 ### 3. 默认账号

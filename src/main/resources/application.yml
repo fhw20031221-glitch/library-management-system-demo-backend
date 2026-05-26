@@ -21,6 +21,14 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+
 app:
   jwt:
     secret: library-demo-jwt-secret-key-2026-for-learning-only-32bytes
