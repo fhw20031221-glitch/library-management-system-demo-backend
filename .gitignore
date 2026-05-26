@@ -34,3 +34,24 @@ build/
 
 ### Runtime logs ###
 *.log
+logs/
+
+### Local environment ###
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.yaml
+application-local.properties
+
+### Test reports and coverage ###
+coverage/
+.nyc_output/
+
+### OS files ###
+.DS_Store
+Thumbs.db
+
+### Temporary files ###
+*.tmp
+*.temp
