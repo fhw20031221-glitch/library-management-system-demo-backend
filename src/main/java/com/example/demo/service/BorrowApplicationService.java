@@ -29,12 +29,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BorrowApplicationService {
 
+    private static final int MAX_BORROW_DAYS = 30;
+
     private final BorrowApplicationMapper borrowApplicationMapper;
     private final BookMapper bookMapper;
     private final UserMapper userMapper;
 
     @Transactional
     public BorrowApplicationVO create(BorrowCreateRequest request, LoginUser loginUser) {
+        LocalDate dueDate = validateCreateDueDate(request.getDueDate());
         Book book = bookMapper.selectById(request.getBookId());
         if (book == null) {
             throw new BusinessException(404, "图书不存在");
@@ -58,6 +61,7 @@ public class BorrowApplicationService {
         application.setBookId(request.getBookId());
         application.setReason(request.getReason());
         application.setStatus(Constants.BORROW_PENDING);
+        application.setDueDate(dueDate);
         borrowApplicationMapper.insert(application);
         return toVO(application);
     }
@@ -100,6 +104,8 @@ public class BorrowApplicationService {
         application.setApprovalComment(request.getComment());
         application.setApprovedAt(LocalDateTime.now());
         if (Boolean.TRUE.equals(request.getApproved())) {
+            LocalDate today = LocalDate.now();
+            LocalDate dueDate = resolveApprovalDueDate(application, today);
             int updated = bookMapper.update(null, Wrappers.<Book>lambdaUpdate()
                     .eq(Book::getId, application.getBookId())
                     .eq(Book::getStatus, Constants.BOOK_NORMAL)
@@ -108,10 +114,9 @@ public class BorrowApplicationService {
             if (updated == 0) {
                 throw new BusinessException("图书库存不足，审批无法通过");
             }
-            LocalDate today = LocalDate.now();
             application.setStatus(Constants.BORROW_APPROVED);
             application.setBorrowDate(today);
-            application.setDueDate(today.plusDays(30));
+            application.setDueDate(dueDate);
         } else {
             application.setStatus(Constants.BORROW_REJECTED);
         }
@@ -177,5 +182,33 @@ public class BorrowApplicationService {
                 .createdAt(application.getCreatedAt())
                 .updatedAt(application.getUpdatedAt())
                 .build();
+    }
+
+    private LocalDate validateCreateDueDate(LocalDate dueDate) {
+        if (dueDate == null) {
+            throw new BusinessException("预计归还日期不能为空");
+        }
+        LocalDate today = LocalDate.now();
+        if (dueDate.isBefore(today)) {
+            throw new BusinessException("预计归还日期不能早于今天");
+        }
+        if (dueDate.isAfter(today.plusDays(MAX_BORROW_DAYS))) {
+            throw new BusinessException("最长借阅时间不能超过30天");
+        }
+        return dueDate;
+    }
+
+    private LocalDate resolveApprovalDueDate(BorrowApplication application, LocalDate today) {
+        LocalDate dueDate = application.getDueDate();
+        if (dueDate == null) {
+            return today.plusDays(MAX_BORROW_DAYS);
+        }
+        if (dueDate.isBefore(today)) {
+            throw new BusinessException("预计归还日期已过期，请拒绝后让读者重新申请");
+        }
+        if (dueDate.isAfter(today.plusDays(MAX_BORROW_DAYS))) {
+            throw new BusinessException("应还日期不能超过审批日起30天");
+        }
+        return dueDate;
     }
 }
