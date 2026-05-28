@@ -13,6 +13,10 @@ public final class Constants {
     public static final String BORROW_REJECTED = "REJECTED";
     public static final String BORROW_RETURNED = "RETURNED";
 
+    /**
+     * 工具常量类不需要被实例化。
+     * 私有构造方法用于阻止外部 new Constants()。
+     */
     private Constants() {
     }
 }

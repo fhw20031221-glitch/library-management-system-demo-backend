@@ -15,8 +15,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserMapper userMapper;
 
+    /**
+     * Spring Security 根据用户名加载用户信息。
+     * 登录校验和 JWT 过滤器都会通过这个方法把数据库用户转换成 LoginUser。
+     */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {//用户查询方法
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
         if (user == null) {
             throw new UsernameNotFoundException("用户不存在");

@@ -18,6 +18,10 @@ public class PageResult<T> {
     private long size;
     private List<T> records;
 
+    /**
+     * 把 MyBatis-Plus 的分页对象转换成本项目统一的分页返回对象。
+     * Controller 返回 PageResult 后，前端就能拿到 total、current、records 等字段。
+     */
     public static <T> PageResult<T> from(IPage<T> page) {
         return new PageResult<>(
                 page.getTotal(),

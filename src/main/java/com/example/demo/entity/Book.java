@@ -28,9 +28,9 @@ public class Book {
 
     private Integer totalStock;
 
-    private Integer availableStock;
+    private Integer availableStock;//可用库存余量
 
-    private String status;
+    private String status;//状态
 
     private String description;
 

@@ -37,6 +37,10 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final Environment environment;
 
+    /**
+     * 配置 Spring Security 的核心过滤链。
+     * 这里定义哪些接口放行、哪些接口需要角色权限，并把 JWT 过滤器加入认证流程。
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -63,6 +67,10 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * 配置跨域规则。
+     * 前端开发服务器和后端端口不同，浏览器会触发 CORS 校验，所以需要允许指定前端地址访问。
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -76,16 +84,28 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * 暴露 AuthenticationManager。
+     * AuthService 登录时会用它校验用户名和密码是否正确。
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+    /**
+     * 配置密码加密器。
+     * 用户密码使用 BCrypt 存储，登录时也通过这个加密器进行匹配。
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * 向前端写出统一格式的认证或授权错误响应。
+     * 例如未登录返回 401，没有权限返回 403。
+     */
     private void writeError(HttpServletResponse response, int code, String message) throws IOException {
         response.setStatus(code);
         response.setCharacterEncoding("UTF-8");
@@ -93,6 +113,10 @@ public class SecurityConfig {
         objectMapper.writeValue(response.getWriter(), ApiResponse.fail(code, message));
     }
 
+    /**
+     * 从 application.yml 中读取允许跨域访问的前端地址。
+     * 如果没有配置，则默认允许本地 Vite 地址 http://localhost:5173。
+     */
     private List<String> allowedOrigins() {
         List<String> origins = new ArrayList<>();
         for (int i = 0; ; i++) {

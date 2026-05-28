@@ -13,6 +13,10 @@ public class OpenApiConfig {
 
     private static final String SECURITY_SCHEME_NAME = "BearerAuth";
 
+    /**
+     * 配置 Swagger / OpenAPI 文档信息。
+     * 同时声明 Bearer JWT 认证，让 Swagger 页面可以填写 Token 后测试受保护接口。
+     */
     @Bean
     public OpenAPI libraryOpenAPI() {
         return new OpenAPI()

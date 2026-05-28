@@ -22,11 +22,19 @@ public class AuthController {
 
     private final AuthService authService;
 
+    /**
+     * 登录接口。
+     * 前端提交用户名和密码，Service 校验成功后返回 JWT Token 和当前用户信息。
+     */
     @PostMapping("/login")
     public ApiResponse<AuthVO> login(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.success(authService.login(request));
     }
 
+    /**
+     * 获取当前登录用户信息。
+     * @AuthenticationPrincipal 会从 Spring Security 上下文中取出 JWT 解析后的 LoginUser。
+     */
     @GetMapping("/me")
     public ApiResponse<UserVO> me(@AuthenticationPrincipal LoginUser loginUser) {
         return ApiResponse.success(authService.current(loginUser));

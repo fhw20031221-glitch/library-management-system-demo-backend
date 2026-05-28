@@ -9,6 +9,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MybatisPlusConfig {
 
+    /**
+     * 注册 MyBatis-Plus 拦截器。
+     * 这里加入分页拦截器后，selectPage 才能自动生成 MySQL 分页 SQL。
+     */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();

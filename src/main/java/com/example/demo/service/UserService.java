@@ -27,6 +27,10 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * 分页查询用户列表。
+     * 支持用户名/昵称模糊搜索，并可按角色、状态过滤。
+     */
     public PageResult<UserVO> page(long current, long size, String keyword, String role, String status) {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.hasText(keyword)) {
@@ -47,6 +51,10 @@ public class UserService {
         return new PageResult<>(page.getTotal(), page.getPages(), page.getCurrent(), page.getSize(), records);
     }
 
+    /**
+     * 创建用户。
+     * 校验用户名唯一，使用 BCrypt 加密密码，再保存用户基础信息。
+     */
     @Transactional
     public UserVO create(UserCreateRequest request) {
         Long count = userMapper.selectCount(new LambdaQueryWrapper<User>().eq(User::getUsername, request.getUsername()));
@@ -65,6 +73,10 @@ public class UserService {
         return toVO(user);
     }
 
+    /**
+     * 更新用户基础信息。
+     * 不在这里修改密码；密码重置由 resetPassword 单独处理。
+     */
     @Transactional
     public UserVO update(Long id, UserUpdateRequest request) {
         User user = getRequired(id);
@@ -81,6 +93,10 @@ public class UserService {
         return toVO(user);
     }
 
+    /**
+     * 更新用户状态。
+     * 用于管理员启用或禁用用户账号。
+     */
     @Transactional
     public UserVO updateStatus(Long id, UserStatusRequest request) {
         User user = getRequired(id);
@@ -89,6 +105,10 @@ public class UserService {
         return toVO(user);
     }
 
+    /**
+     * 重置用户密码。
+     * 新密码会先 BCrypt 加密，再写入数据库。
+     */
     @Transactional
     public void resetPassword(Long id, PasswordResetRequest request) {
         User user = getRequired(id);
@@ -96,6 +116,10 @@ public class UserService {
         userMapper.updateById(user);
     }
 
+    /**
+     * 根据 ID 查询用户，不存在就抛 404。
+     * 这个方法复用在更新、禁用、重置密码等业务中。
+     */
     public User getRequired(Long id) {
         User user = userMapper.selectById(id);
         if (user == null) {
@@ -104,7 +128,11 @@ public class UserService {
         return user;
     }
 
-    public UserVO toVO(User user) {
+    /**
+     * 把数据库实体 User 转换成接口返回对象。
+     * 这里不会返回 password 字段，避免密码泄露到前端。
+     */
+    public UserVO toVO(User user) {//转换
         return UserVO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -118,6 +146,10 @@ public class UserService {
                 .build();
     }
 
+    /**
+     * 规范化并校验角色。
+     * 没有传角色时使用默认角色，只允许 ADMIN 或 READER。
+     */
     private String normalizeRole(String role, String defaultRole) {
         String value = StringUtils.hasText(role) ? role.trim().toUpperCase() : defaultRole;
         if (!Constants.ROLE_ADMIN.equals(value) && !Constants.ROLE_READER.equals(value)) {
@@ -126,6 +158,10 @@ public class UserService {
         return value;
     }
 
+    /**
+     * 规范化并校验用户状态。
+     * 没有传状态时使用默认状态，只允许 ENABLED 或 DISABLED。
+     */
     private String normalizeStatus(String status, String defaultStatus) {
         String value = StringUtils.hasText(status) ? status.trim().toUpperCase() : defaultStatus;
         if (!Constants.STATUS_ENABLED.equals(value) && !Constants.STATUS_DISABLED.equals(value)) {
